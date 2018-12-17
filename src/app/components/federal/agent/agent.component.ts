@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AgentService } from '../../../services/agent.service';
 import { Agent } from '../../../shared/sdk/models/Agent';
 import { ActivatedRoute, ParamMap } from '@angular/router';
+import {switchMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-agent',
@@ -19,8 +20,8 @@ export class AgentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap
-      .switchMap((paramMap: ParamMap) => this.agentService.getAgentById(paramMap.get('id')))
+    this.route.paramMap.pipe(
+      switchMap((paramMap: ParamMap) => this.agentService.getAgentById(paramMap.get('id'))))
       .subscribe((agent: Agent) => {
         this.agent = agent;
       });

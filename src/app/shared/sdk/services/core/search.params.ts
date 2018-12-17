@@ -1,6 +1,6 @@
 /* tslint:disable */
 import { Injectable } from '@angular/core';
-import { URLSearchParams } from '@angular/http';
+import {HttpParams} from "@angular/common/http";
 /**
 * @author Jonathan Casarrubias <twitter:@johncasarrubias> <github:@mean-expert-official>
 * @module JSONSearchParams
@@ -13,21 +13,21 @@ import { URLSearchParams } from '@angular/http';
 @Injectable()
 export class JSONSearchParams {
 
-    private _usp: URLSearchParams;
+    private _usp: HttpParams;
 
     public setJSON(obj: any) {
-        this._usp = new URLSearchParams(this._JSON2URL(obj, false));
+        this._usp = this._JSON2URL(obj, false);
     }
 
-    public getURLSearchParams(): URLSearchParams {
+    public getURLSearchParams(): HttpParams {
         return this._usp;
     }
 
     private _JSON2URL(obj: any, parent: any) {
-        var parts: any = [];
-        for (var key in obj)
-        parts.push(this._parseParam(key, obj[key], parent));
-        return parts.join('&');
+        let params: HttpParams=new HttpParams();
+        for (let key in obj)
+        params.set(key, obj[key]);
+        return params;
     }
 
     private _parseParam(key: string, value: any, parent: string) {

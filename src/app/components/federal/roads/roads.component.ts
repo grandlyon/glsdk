@@ -1,7 +1,6 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Road } from '../../../shared/sdk/models/Road';
 import { RoadService } from '../../../services/road.service';
-import { Router } from '@angular/router';
 import { City } from '../../../shared/sdk/models/City';
 import { MatPaginator, MatSort, PageEvent } from '@angular/material';
 import { RoadDataSource } from './road.datasource';

@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Agent } from '../../../shared/sdk/models/Agent';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AgentAssignment } from '../../../shared/sdk/models/AgentAssignment';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 import { AgentRank } from '../../../shared/sdk/models/AgentRank';
 import { AgentRankService } from '../../../services/agent-rank.service';
 import { DepartmentService } from '../../../services/department.service';

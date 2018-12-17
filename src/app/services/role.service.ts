@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { Role } from '../shared/sdk/models/Role';
 import { RoleApi } from '../shared/sdk/services/custom/Role';
 

@@ -2,14 +2,22 @@
   "extends": [
     "tslint-config-airbnb"
   ],
+  "rulesDirectory": [
+    "node_modules/rxjs-tslint"
+  ],
   "rules": {
     "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
     "strict-boolean-expressions": [false],
-    "max-line-length": [true, 120]
+    "max-line-length": [true, 120],
+    "rxjs-collapse-imports": true,
+    "rxjs-pipeable-operators-only": true,
+    "rxjs-no-static-observable-methods": true,
+    "rxjs-proper-imports": true
   },
   "linterOptions": {
     "exclude": [
       "**/src/app/shared/**"
     ]
   }
+}
 }
