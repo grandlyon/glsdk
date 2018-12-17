@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AgentRankApi } from '../shared/sdk/services/custom/AgentRank';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { AgentRank } from '../shared/sdk/models/AgentRank';
 
 @Injectable()

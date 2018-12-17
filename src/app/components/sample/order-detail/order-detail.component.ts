@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { OrderService } from '../../../services/order.service';
 import { Order } from '../../../shared/sdk/models/Order';
-import 'rxjs/add/operator/switchMap';
+import {switchMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-order-detail',
@@ -20,8 +20,8 @@ export class OrderComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap
-      .switchMap((params: ParamMap) => this.orderService.findById(params.get('id')))
+    this.route.paramMap.pipe(
+      switchMap((params: ParamMap) => this.orderService.findById(params.get('id'))))
       .subscribe((order: Order) => this.order = order);
   }
 }

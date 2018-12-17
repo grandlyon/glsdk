@@ -1,18 +1,15 @@
 /* tslint:disable */
 import { Injectable, Inject, Optional } from '@angular/core';
-import { Http, Headers, Request, RequestOptions } from '@angular/http';
-import { NgModule, ModuleWithProviders } from '@angular/core';
+import {HttpClient, HttpHeaders, HttpRequest} from '@angular/common/http';
 import { JSONSearchParams } from './search.params';
 import { ErrorHandler } from './error.service';
 import { LoopBackAuth } from './auth.service';
 import { LoopBackConfig } from '../../lb.config';
-import { LoopBackFilter, AccessToken } from '../../models/BaseModels';
+import { LoopBackFilter} from '../../models/BaseModels';
 import { SDKModels } from '../custom/SDKModels';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/map';
+import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import {catchError, map} from "rxjs/operators";
 // Making Sure EventSource Type is available to avoid compilation issues.
 declare var EventSource: any;
 /**
@@ -33,7 +30,7 @@ export abstract class BaseLoopBackApi {
   protected model: any;
 
   constructor(
-    @Inject(Http) protected http: Http,
+    @Inject(HttpClient) protected http: HttpClient,
     @Inject(SDKModels) protected models: SDKModels,
     @Inject(LoopBackAuth) protected auth: LoopBackAuth,
     @Inject(JSONSearchParams) protected searchParams: JSONSearchParams,
@@ -70,8 +67,8 @@ export abstract class BaseLoopBackApi {
       console.info('SDK: PubSub functionality is disabled, generate SDK using -io enabled');
     } else {
       // Headers to be sent
-      let headers: Headers = new Headers();
-      headers.append('Content-Type', 'application/json');
+      let headers: HttpHeaders = new HttpHeaders();
+      headers.set('Content-Type', 'application/json');
       // Authenticate request
       this.authenticate(url, headers);
       // Body fix for built in remote methods using "data", "options" or "credentials
@@ -88,7 +85,7 @@ export abstract class BaseLoopBackApi {
       // Separate filter object from url params and add to search query
       if (urlParams.filter) {
         if (LoopBackConfig.isHeadersFilteringSet()) {
-          headers.append('filter', JSON.stringify(urlParams.filter));
+          headers.set('filter', JSON.stringify(urlParams.filter));
         } else {
           filter = `?filter=${ encodeURI(JSON.stringify(urlParams.filter))}`;
         }
@@ -108,19 +105,15 @@ export abstract class BaseLoopBackApi {
         headers = customHeaders(headers);
       }
       this.searchParams.setJSON(urlParams);
-      let request: Request = new Request(
-        new RequestOptions({
-          headers : headers,
-          method  : method,
-          url     : `${url}${filter}`,
-          search  : Object.keys(urlParams).length > 0
-                  ? this.searchParams.getURLSearchParams() : null,
-          body    : body ? JSON.stringify(body) : undefined
-        })
+      let request: HttpRequest<any> = new HttpRequest(
+        method,
+        `${url}${filter}`,
+        body ? JSON.stringify(body) : undefined,
+        { headers: headers , params: Object.keys(urlParams).length > 0
+            ? this.searchParams.getURLSearchParams() : null}
       );
-      return this.http.request(request)
-        .map((res: any) => (res.text() != "" ? res.json() : {}))
-        .catch((e) => this.errorHandler.handleError(e));
+      return this.http.request(request).pipe(
+        catchError((e) => this.errorHandler.handleError(e)));
     }
   }
   /**
@@ -133,9 +126,9 @@ export abstract class BaseLoopBackApi {
    * @description
    * This method will try to authenticate using either an access_token or basic http auth
    */
-  public authenticate<T>(url: string, headers: Headers): void {
+  public authenticate<T>(url: string, headers: HttpHeaders): void {
     if (this.auth.getAccessTokenId()) {
-      headers.append(
+      headers.set(
         'Authorization',
         LoopBackConfig.getAuthPrefix() + this.auth.getAccessTokenId()
       );
@@ -155,7 +148,7 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getPath(),
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path
-    ].join('/'), undefined, undefined, { data }, null, customHeaders).map((data: T) => this.model.factory(data));
+    ].join('/'), undefined, undefined, { data }, null, customHeaders).pipe(map((data: T) => this.model.factory(data)));
   }
   /**
    * @method createMany
@@ -171,8 +164,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getPath(),
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path
-    ].join('/'), undefined, undefined, { data }, null, customHeaders)
-    .map((datum: T[]) => datum.map((data: T) => this.model.factory(data)));
+    ].join('/'), undefined, undefined, { data }, null, customHeaders).pipe(
+    map((datum: T[]) => datum.map((data: T) => this.model.factory(data))));
   }
   /**
    * @method findById
@@ -191,8 +184,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
       ':id'
-    ].join('/'), { id }, _urlParams, undefined, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), { id }, _urlParams, undefined, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method find
@@ -207,8 +200,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getPath(),
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path
-    ].join('/'), undefined, { filter }, undefined, null, customHeaders)
-    .map((datum: T[]) => datum.map((data: T) => this.model.factory(data)));
+    ].join('/'), undefined, { filter }, undefined, null, customHeaders).pipe(
+    map((datum: T[]) => datum.map((data: T) => this.model.factory(data))));
   }
   /**
    * @method exists
@@ -240,8 +233,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
       'findOne'
-    ].join('/'), undefined, { filter }, undefined, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), undefined, { filter }, undefined, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method updateAll
@@ -275,8 +268,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
       ':id'
-    ].join('/'), { id }, undefined, undefined, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), { id }, undefined, undefined, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method count
@@ -310,8 +303,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
       ':id'
-    ].join('/'), { id }, undefined, { data }, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), { id }, undefined, { data }, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method upsert
@@ -326,8 +319,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getPath(),
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
-    ].join('/'), undefined, undefined, { data }, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), undefined, undefined, { data }, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method upsertPatch
@@ -342,8 +335,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getPath(),
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
-    ].join('/'), undefined, undefined, { data }, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), undefined, undefined, { data }, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method upsertWithWhere
@@ -361,8 +354,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
       'upsertWithWhere'
-    ].join('/'), undefined, _urlParams, { data }, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), undefined, _urlParams, { data }, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method replaceOrCreate
@@ -378,8 +371,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
       'replaceOrCreate'
-    ].join('/'), undefined, undefined, { data }, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), undefined, undefined, { data }, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method replaceById
@@ -395,8 +388,8 @@ export abstract class BaseLoopBackApi {
       LoopBackConfig.getApiVersion(),
       this.model.getModelDefinition().path,
       ':id', 'replace'
-    ].join('/'), { id }, undefined, { data }, null, customHeaders)
-    .map((data: T) => this.model.factory(data));
+    ].join('/'), { id }, undefined, { data }, null, customHeaders).pipe(
+    map((data: T) => this.model.factory(data)));
   }
   /**
    * @method createChangeStream

@@ -39,7 +39,6 @@ import { LoopBackAuth } from './services/core/auth.service';
 import { LoggerService } from './services/custom/logger.service';
 import { SDKModels } from './services/custom/SDKModels';
 import { InternalStorage, SDKStorage } from './storage/storage.swaps';
-import { HttpModule } from '@angular/http';
 import { CommonModule } from '@angular/common';
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CookieBrowser } from './storage/cookie.browser';
@@ -56,6 +55,8 @@ import { StorageContainerApi } from './services/custom/StorageContainer';
 import { AgentAssignmentApi } from './services/custom/AgentAssignment';
 import { OrderApi } from './services/custom/Order';
 import { OrderContributionApi } from './services/custom/OrderContribution';
+import { HttpClientModule } from '@angular/common/http';
+
 /**
 * @module SDKBrowserModule
 * @description
@@ -66,7 +67,7 @@ import { OrderContributionApi } from './services/custom/OrderContribution';
 *  3.- Progressive applications (Angular Mobile, Ionic, WebViews, etc)
 **/
 @NgModule({
-  imports:      [ CommonModule, HttpModule ],
+  imports:      [ CommonModule, HttpClientModule ],
   declarations: [ ],
   exports:      [ ],
   providers:    [

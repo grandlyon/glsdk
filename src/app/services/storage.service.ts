@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { StorageFile } from '../models/storage-file';
 import { StorageContainerApi } from '../shared/sdk/services/custom/StorageContainer';
@@ -7,7 +7,8 @@ import { FileUploader } from 'ng2-file-upload';
 import { environment } from '../../environments/environment';
 import { LoopBackAuth } from '../shared/sdk/services/core/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
+import {tap} from "rxjs/operators";
 
 @Injectable()
 export class StorageService {
@@ -39,8 +40,8 @@ export class StorageService {
   }
 
   createContainer(container: StorageContainer): Observable<StorageContainer> {
-    return this.storageContainerApi.create(container)
-      .do(() => this.storageContainersChangeSubject.next());
+    return this.storageContainerApi.create(container).pipe(
+      tap(() => this.storageContainersChangeSubject.next()));
   }
 
   getUploader(container: StorageContainer): FileUploader {
@@ -74,8 +75,8 @@ export class StorageService {
   }
 
   removeFile(file: StorageFile): Observable<void> {
-    return this.storageContainerApi.removeFile(file.container, file.name)
-      .do(() => this.storageContainerFilesChangeSubject.next());
+    return this.storageContainerApi.removeFile(file.container, file.name).pipe(
+      tap(() => this.storageContainerFilesChangeSubject.next()));
   }
 
 }

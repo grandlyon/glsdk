@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { SDKToken } from '../shared/sdk/models/BaseModels';
 import { LoginService } from './login.service';
+import {map} from "rxjs/operators";
 
 const ldapAuthEndpoint = `${environment.loopback.baseUrl}/auth/ldap`;
 
@@ -16,11 +17,11 @@ export class LdapLoginService implements LoginService {
   }
 
   login(username: string, password: string): Observable<SDKToken> {
-    return this.httpClient.post(ldapAuthEndpoint, { username, password })
-      .map(
+    return this.httpClient.post(ldapAuthEndpoint, { username, password }).pipe(
+      map(
         (response: { access_token: string, userId: string }) =>
           new SDKToken({ id: response.access_token, userId: response.userId }),
-      );
+      ));
   }
 
 }

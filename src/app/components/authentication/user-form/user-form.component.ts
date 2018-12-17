@@ -4,7 +4,8 @@ import { User } from '../../../shared/sdk/models';
 import { UserService } from '../../../services/user.service';
 import { Role } from '../../../shared/sdk/models/Role';
 import { RoleService } from '../../../services/role.service';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import {switchMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-user-form',
@@ -26,8 +27,8 @@ export class UserFormComponent implements OnInit {
 
   ngOnInit() {
     this.route.paramMap
-      .filter((paramMap: ParamMap) => paramMap.get('id') !== null)
-      .switchMap((paramMap: ParamMap) => this.userService.getUserById(parseInt(paramMap.get('id'), 10)))
+      .filter((paramMap: ParamMap) => paramMap.get('id') !== null).pipe(
+      switchMap((paramMap: ParamMap) => this.userService.getUserById(parseInt(paramMap.get('id'), 10))))
       .subscribe((user: User) => {
         this.user = user;
       });

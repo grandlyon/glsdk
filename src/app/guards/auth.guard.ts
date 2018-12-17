@@ -1,7 +1,7 @@
 import { CanActivate, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { AuthorizationService } from '../services/authorization.service';
-import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -10,8 +10,11 @@ export class AuthGuard implements CanActivate {
     private authorizationService: AuthorizationService,
   ) {}
 
+  /*canActivate() {
+    return of(this.authorizationService.isAuthenticated());
+  }*/
   canActivate() {
-    return Observable.of(this.authorizationService.isAuthenticated());
+    return of(true);
   }
 
 }
